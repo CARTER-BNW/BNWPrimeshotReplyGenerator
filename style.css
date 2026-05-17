@@ -61,4 +61,7 @@ button:hover {
 #status {
     margin-top: 15px;
     color: #4da6ff;
+    font-size: 18px;
+    min-height: 24px;
+    transition: opacity 0.25s ease;
 }

@@ -63,7 +63,7 @@ document.getElementById("nextBtn").addEventListener("click", () => {
     advance();
 });
 
-// Preload signature + responses
+// PRELOAD SIGNATURE + RESPONSES
 window.onload = () => {
     document.getElementById("signature").value = "- Carter @Carter.BNW";
 

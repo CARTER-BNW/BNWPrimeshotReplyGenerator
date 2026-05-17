@@ -18,12 +18,30 @@ function loadResponses() {
     return shuffled;
 }
 
+function getCurrentReply() {
+    const signature = document.getElementById("signature").value.trim();
+    let reply = shuffled[index];
+    if (signature) reply += " " + signature;
+    return reply;
+}
+
 function advance() {
     index++;
     if (index >= shuffled.length) {
         shuffled = shuffle(shuffled);
         index = 0;
     }
+}
+
+function showReply(prefix = "") {
+    const reply = getCurrentReply();
+    const status = document.getElementById("status");
+
+    status.style.opacity = 0;
+    setTimeout(() => {
+        status.innerText = prefix + reply;
+        status.style.opacity = 1;
+    }, 150);
 }
 
 document.getElementById("copyBtn").addEventListener("click", () => {
@@ -33,16 +51,13 @@ document.getElementById("copyBtn").addEventListener("click", () => {
         return;
     }
 
-    const signature = document.getElementById("signature").value.trim();
-    let reply = responses[index];
-
-    if (signature) reply += " " + signature;
-
+    const reply = getCurrentReply();
     navigator.clipboard.writeText(reply);
 
-    document.getElementById("status").innerText = "Copied: " + reply;
+    showReply("Copied: ");
 
     advance();
+    setTimeout(showReply, 300);
 });
 
 document.getElementById("nextBtn").addEventListener("click", () => {
@@ -52,18 +67,11 @@ document.getElementById("nextBtn").addEventListener("click", () => {
         return;
     }
 
-    const signature = document.getElementById("signature").value.trim();
-    let reply = responses[index];
-
-    let displayText = reply;
-    if (signature) displayText += " " + signature;
-
-    document.getElementById("status").innerText = "Next: " + displayText;
-
     advance();
+    showReply("Next: ");
 });
 
-// PRELOAD SIGNATURE + RESPONSES
+// PRELOAD SIGNATURE + RESPONSES + SHOW FIRST REPLY
 window.onload = () => {
     document.getElementById("signature").value = "🖤🤍 Carter @Carter.BNW";
 
@@ -257,5 +265,10 @@ Really cool energy toward the featured artist 📷 Hope your morning’s smooth.
 Love seeing you hype the featured artist 📸 Hope your morning’s easy.
 Really wholesome support for the featured artist ✨ Hope your day’s been smooth.
 Really cool message about the featured artist 📷 Hope your day’s been easy.
-Love seeing you celebrate the featured artist 📸 Hope your morning’s smooth.`;
+Love seeing you celebrate the featured artist 📸 Hope your morning’s smooth.
+
+`;
+
+    loadResponses();
+    showReply();
 };

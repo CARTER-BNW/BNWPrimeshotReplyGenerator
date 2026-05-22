@@ -1,78 +1,150 @@
 let shuffled = [];
 let index = 0;
+
+// SHUFFLE ARRAY
 function shuffle(array) {
-    return array
+    return [...array]
         .map(value => ({ value, sort: Math.random() }))
         .sort((a, b) => a.sort - b.sort)
         .map(obj => obj.value);
 }
 
+// LOAD RESPONSES FROM TEXTAREA
 function loadResponses() {
     const raw = document.getElementById("responses").value.trim();
-    if (!raw) return [];
 
-    const list = raw.split("\n").map(r => r.trim()).filter(r => r.length > 0);
+    if (!raw) {
+        shuffled = [];
+        index = 0;
+        return;
+    }
+
+    const list = raw
+        .split("\n")
+        .map(r => r.trim())
+        .filter(r => r.length > 0);
+
     shuffled = shuffle(list);
     index = 0;
-    return shuffled;
 }
 
+// GET CURRENT REPLY
 function getCurrentReply() {
+    if (shuffled.length === 0) return "";
+
     const signature = document.getElementById("signature").value.trim();
+
     let reply = shuffled[index];
-    if (signature) reply += " " + signature;
+
+    if (signature) {
+        reply += " " + signature;
+    }
+
     return reply;
 }
 
+// MOVE TO NEXT RESPONSE
 function advance() {
+    if (shuffled.length === 0) return;
+
     index++;
+
+    // RESHUFFLE WHEN FINISHED
     if (index >= shuffled.length) {
         shuffled = shuffle(shuffled);
         index = 0;
     }
 }
 
+// SHOW CURRENT REPLY
 function showReply(prefix = "") {
-    const reply = getCurrentReply();
     const status = document.getElementById("status");
 
+    if (shuffled.length === 0) {
+        status.innerText = "Please enter responses first.";
+        return;
+    }
+
+    const reply = getCurrentReply();
+
     status.style.opacity = 0;
+
     setTimeout(() => {
         status.innerText = prefix + reply;
         status.style.opacity = 1;
     }, 150);
 }
 
-document.getElementById("copyBtn").addEventListener("click", () => {
-    let responses = shuffled.length ? shuffled : loadResponses();
-    if (responses.length === 0) {
+// COPY BUTTON
+document.getElementById("copyBtn").addEventListener("click", async () => {
+
+    if (shuffled.length === 0) {
+        loadResponses();
+    }
+
+    if (shuffled.length === 0) {
         document.getElementById("status").innerText = "Please enter responses first.";
         return;
     }
 
     const reply = getCurrentReply();
-    navigator.clipboard.writeText(reply);
 
-    showReply("Copied: ");
+    try {
+        await navigator.clipboard.writeText(reply);
 
-    advance();
-    setTimeout(showReply, 300);
+        showReply("Copied: ");
+
+        advance();
+
+        setTimeout(() => {
+            showReply();
+        }, 300);
+
+    } catch (err) {
+        document.getElementById("status").innerText = "Clipboard failed.";
+    }
 });
 
+// NEXT BUTTON
 document.getElementById("nextBtn").addEventListener("click", () => {
-    let responses = shuffled.length ? shuffled : loadResponses();
-    if (responses.length === 0) {
+
+    if (shuffled.length === 0) {
+        loadResponses();
+    }
+
+    if (shuffled.length === 0) {
         document.getElementById("status").innerText = "Please enter responses first.";
         return;
     }
 
     advance();
+
     showReply("Next: ");
 });
 
-// PRELOAD SIGNATURE + RESPONSES + SHOW FIRST REPLY
+// AUTO RELOAD WHEN RESPONSES CHANGE
+document.getElementById("responses").addEventListener("input", () => {
+    loadResponses();
+
+    if (shuffled.length > 0) {
+        showReply();
+    } else {
+        document.getElementById("status").innerText = "";
+    }
+});
+
+// AUTO UPDATE SIGNATURE
+document.getElementById("signature").addEventListener("input", () => {
+    if (shuffled.length > 0) {
+        showReply();
+    }
+});
+
+// PRELOAD DEFAULT DATA
 window.onload = () => {
-    document.getElementById("signature").value = "🖤🤍 Carter @Carter.BNW";
+
+    document.getElementById("signature").value =
+        "🖤🤍 Carter @Carter.BNW";
 
     document.getElementById("responses").value =
 `Thanks for the support

@@ -1,6 +1,5 @@
 let shuffled = [];
 let index = 0;
-
 function shuffle(array) {
     return array
         .map(value => ({ value, sort: Math.random() }))
